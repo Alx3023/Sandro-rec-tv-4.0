@@ -1,0 +1,16 @@
+{
+  "name": "SANDRO REC TV",
+  "short_name": "SANDRO REC",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0e19",
+  "theme_color": "#00d4ff",
+  "description": "Player e registratore di canali TV M3U",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

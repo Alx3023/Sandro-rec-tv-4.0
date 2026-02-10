@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>SANDRO REC TV</title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="SANDRO REC TV">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <style>
+    /* STILI COME PRIMA - SEMPLIFICATI PER FOCUS SULLA FUNZIONALITÀ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: #0a0e19;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #0a0e19 0%, #1a1f3a 100%);
+      padding: 15px 20px;
+      border-bottom: 2px solid #00d4ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .logo span {
+      color: #00d4ff;
+    }
+    
+    .logo small {
+      font-size: 12px;
+      background: #00d4ff;
+      color: #0a0e19;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 5px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    button, .file-btn {
+      background: #1a1f3a;
+      color: white;
+      border: 1px solid #2a3455;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    button:hover, .file-btn:hover {
+      background: #2a3455;
+      border-color: #00d4ff;
+    }
+    
+    #recordBtn {
+      background: #ff1b1b;
+      border-color: #ff1b1b;
+      font-weight: bold;
+    }
+    
+    #recordBtn.recording {
+      background: #00cc00;
+      border-color: #00cc00;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      gap: 15px;
+      padding: 15px;
+      overflow: hidden;
+    }
+    
+    .panel {
+      background: rgba(26, 31, 58, 0.8);
+      border-radius: 8px;
+      border: 1px solid #2a3455;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .panel h2 {
+      font-size: 16px;
+      color: #00d4ff;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a3455;
+    }
+    
+    #channelsList {
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .channel-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      background: rgba(10, 14, 25, 0.8);
+      border-radius: 5px;
+      border: 1px solid #2a3455;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .channel-item:hover {
+      background: #1a1f3a;
+      border-color: #00d4ff;
+      transform: translateX(5px);
+    }
+    
+    .channel-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #ffffff;
+    }
+    
+    .channel-url {
+      font-size: 12px;
+      color: #8899cc;
+      word-break: break-all;
+    }
+    
+    #savedPlaylists {
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .playlist-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      background: rgba(10, 14, 25, 0.8);
+      border-radius: 5px;
+      border: 1px solid #2a3455;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .playlist-item:hover {
+      background: #1a1f3a;
+      border-color: #00d4ff;
+    }
+    
+    #mainVideo {
+      width: 100%;
+      height: calc(100vh - 200px);
+      max-height: 70vh;
+      background: black;
+      border-radius: 8px;
+    }
+    
+    .now-playing {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(10, 14, 25, 0.8);
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    
+    .status-bar {
+      background: #1a1f3a;
+      padding: 10px 20px;
+      border-top: 1px solid #2a3455;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #8899cc;
+    }
+    
+    #statusInfo {
+      color: #00d4ff;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #00d4ff;
+      color: #0a0e19;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .error { background: #ff1b1b; color: white; }
+    .success { background: #00cc00; color: white; }
+    .warning { background: #ffaa00; color: #0a0e19; }
+    
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #0a0e19;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #2a3455;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00d4ff;
+    }
+    
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      SANDRO <span>REC</span> TV <small>PRO</small>
+    </div>
+    <div class="controls">
+      <label class="file-btn">
+        📁 Carica M3U
+        <input type="file" id="playlistFile" class="file-input" accept=".m3u,.m3u8,.txt">
+      </label>
+      <button id="testBtn">📺 Lista Test</button>
+      <button id="recordBtn">⏺️ REC</button>
+      <button id="clearAll">🗑️ Pulisci Tutto</button>
+    </div>
+  </header>
+  
+  <main>
+    <section class="panel">
+      <h2>📡 Canali TV</h2>
+      <ul id="channelsList"></ul>
+    </section>
+    
+    <section class="panel">
+      <h2>🎬 Player</h2>
+      <video id="mainVideo" controls playsinline></video>
+      <div class="now-playing">
+        <div id="nowPlayingTitle">Nessun canale selezionato</div>
+        <div id="nowPlayingInfo" style="font-size:12px; color:#8899cc;"></div>
+      </div>
+    </section>
+    
+    <section class="panel">
+      <h2>💾 Liste Salvate</h2>
+      <ul id="savedPlaylists"></ul>
+    </section>
+  </main>
+  
+  <div class="status-bar">
+    <div id="statusInfo">Pronto - Carica una lista M3U</div>
+    <div id="channelCount">0 canali</div>
+  </div>
+
+  <script>
+    // ============================
+    // VARIABILI GLOBALI
+    // ============================
+    const STORAGE_KEY = "SANDRO_REC_TV_v2";
+    let playlists = [];
+    let currentChannel = null;
+    let isRecording = false;
+    
+    // ============================
+    // ELEMENTI DOM
+    // ============================
+    const elements = {
+      playlistFile: document.getElementById('playlistFile'),
+      channelsList: document.getElementById('channelsList'),
+      savedPlaylists: document.getElementById('savedPlaylists'),
+      mainVideo: document.getElementById('mainVideo'),
+      nowPlayingTitle: document.getElementById('nowPlayingTitle'),
+      nowPlayingInfo: document.getElementById('nowPlayingInfo'),
+      recordBtn: document.getElementById('recordBtn'),
+      testBtn: document.getElementById('testBtn'),
+      clearAll: document.getElementById('clearAll'),
+      statusInfo: document.getElementById('statusInfo'),
+      channelCount: document.getElementById('channelCount')
+    };
+    
+    // ============================
+    // INIZIALIZZAZIONE
+    // ============================
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔧 SANDRO REC TV inizializzato');
+      loadFromStorage();
+      setupEventListeners();
+      showNotification('SANDRO REC TV pronto!', 'success');
+    });
+    
+    // ============================
+    // EVENT LISTENERS
+    // ============================
+    function setupEventListeners() {
+      // Carica file M3U
+      elements.playlistFile.addEventListener('change', function(e) {
+        if (this.files.length === 0) return;
+        loadM3UFile(this.files[0]);
+        this.value = ''; // Reset input
+      });
+      
+      // Lista di test
+      elements.testBtn.addEventListener('click', () => {
+        loadTestPlaylist();
+      });
+      
+      // Pulisci tutto
+      elements.clearAll.addEventListener('click', () => {
+        if (confirm('⚠️ Cancellare TUTTE le liste salvate?')) {
+          playlists = [];
+          saveToStorage();
+          renderPlaylists();
+          elements.channelsList.innerHTML = '';
+          resetPlayer();
+          updateChannelCount();
+          showNotification('Tutto cancellato!', 'success');
+        }
+      });
+      
+      // Registrazione
+      elements.recordBtn.addEventListener('click', toggleRecording);
+      
+      // Gestione errori video
+      elements.mainVideo.addEventListener('error', (e) => {
+        console.error('❌ Errore video:', e);
+        showNotification('Errore riproduzione video', 'error');
+      });
+    }
+    
+    // ============================
+    // FUNZIONE PRINCIPALE: CARICA M3U
+    // ============================
+    function loadM3UFile(file) {
+      showNotification(`📂 Caricamento: ${file.name}...`, 'warning');
+      elements.statusInfo.textContent = `Caricamento ${file.name}...`;
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          const content = e.target.result;
+          console.log('📄 Contenuto file (prime 500 caratteri):', content.substring(0, 500));
+          
+          // Tentativo 1: Parser principale
+          let channels = parseM3U(content);
+          
+          // Tentativo 2: Se il primo fallisce, prova parser alternativo
+          if (channels.length === 0) {
+            console.log('⚠️ Parser principale fallito, tentativo alternativo...');
+            channels = parseM3UAlternative(content);
+          }
+          
+          // Tentativo 3: Se ancora fallisce, prova il più semplice
+          if (channels.length === 0) {
+            console.log('⚠️ Parser alternativo fallito, tentativo ultima risorsa...');
+            channels = parseM3USimple(content);
+          }
+          
+          if (channels.length === 0) {
+            throw new Error('Nessun canale trovato nel file');
+          }
+          
+          console.log(`✅ Trovati ${channels.length} canali`);
+          
+          // Crea playlist
+          const playlist = {
+            id: 'playlist_' + Date.now(),
+            name: file.name.replace(/\.[^/.]+$/, ''),
+            channels: channels,
+            date: new Date().toISOString()
+          };
+          
+          playlists.push(playlist);
+          saveToStorage();
+          renderPlaylists();
+          renderChannels(channels);
+          
+          showNotification(`✅ ${file.name} caricato! (${channels.length} canali)`, 'success');
+          elements.statusInfo.textContent = `${channels.length} canali caricati`;
+          updateChannelCount();
+          
+        } catch (error) {
+          console.error('❌ Errore caricamento:', error);
+          showNotification(`❌ Errore: ${error.message}`, 'error');
+          elements.statusInfo.textContent = 'Errore caricamento file';
+          
+          // Mostra anteprima dell'errore
+          const content = e.target.result;
+          const lines = content.split('\n');
+          console.log('📝 Prime 10 righe del file:', lines.slice(0, 10));
+        }
+      };
+      
+      reader.onerror = function() {
+        showNotification('❌ Errore lettura file', 'error');
+        elements.statusInfo.textContent = 'Errore lettura file';
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // ============================
+    // PARSER M3U - VERSIONE ROBUSTA
+    // ============================
+    function parseM3U(content) {
+      const channels = [];
+      const lines = content.split('\n');
+      let currentChannel = null;
+      
+      console.log(`🔍 Analisi ${lines.length} righe...`);
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (!line) continue;
+        
+        // Riga #EXTINF
+        if (line.startsWith('#EXTINF:')) {
+          try {
+            // Estrai tutto dopo #EXTINF:
+            const data = line.substring(8);
+            
+            // Cerca l'ultima virgola (separatore tra attributi e nome)
+            const lastComma = data.lastIndexOf(',');
+            if (lastComma === -1) continue;
+            
+            // Nome del canale (dopo l'ultima virgola)
+            const name = data.substring(lastComma + 1).trim();
+            
+            // Attributi (prima dell'ultima virgola)
+            const attrs = data.substring(0, lastComma);
+            
+            // Estrai logo se presente
+            let logo = null;
+            const logoMatch = attrs.match(/tvg-logo="([^"]*)"/i) || 
+                            attrs.match(/tvg-logo=([^"\s]+)/i) ||
+                            line.match(/logo="([^"]*)"/i);
+            if (logoMatch) {
+              logo = logoMatch[1].trim();
+            }
+            
+            // Estrai group
+            let group = '';
+            const groupMatch = attrs.match(/group-title="([^"]*)"/i) || 
+                             attrs.match(/group-title=([^"\s]+)/i);
+            if (groupMatch) {
+              group = groupMatch[1].trim();
+            }
+            
+            currentChannel = {
+              name: name || `Canale ${channels.length + 1}`,
+              logo: logo,
+              group: group,
+              url: ''
+            };
+            
+            console.log(`📺 Canale trovato: "${currentChannel.name}"`);
+            
+          } catch (e) {
+            console.warn(`⚠️ Errore parsing riga ${i}:`, line);
+            currentChannel = null;
+          }
+        }
+        // Riga URL (non commento, non vuota)
+        else if (currentChannel && !line.startsWith('#') && 
+                (line.startsWith('http://') || line.startsWith('https://') || 
+                 line.startsWith('rtmp://') || line.startsWith('rtsp://') ||
+                 line.includes('://') || line.includes('.m3u8') ||
+                 line.includes('.mp4') || line.includes('.ts'))) {
+          
+          currentChannel.url = line.trim();
+          channels.push({...currentChannel});
+          console.log(`   📡 URL: ${currentChannel.url.substring(0, 50)}...`);
+          currentChannel = null;
+        }
+        // Se non c'era un #EXTINF ma c'è un URL valido
+        else if (!line.startsWith('#') && 
+                (line.startsWith('http://') || line.startsWith('https://') ||
+                 line.includes('://'))) {
+          
+          const name = `Canale ${channels.length + 1}`;
+          channels.push({
+            name: name,
+            url: line.trim(),
+            logo: null,
+            group: ''
+          });
+          console.log(`📡 Canale diretto: ${name}`);
+        }
+      }
+      
+      return channels;
+    }
+    
+    // Parser alternativo per formati diversi
+    function parseM3UAlternative(content) {
+      const channels = [];
+      const lines = content.split('\n');
+      let currentName = 'Canale';
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (!line) continue;
+        
+        // Se inizia con #EXTINF, cerca il nome
+        if (line.startsWith('#EXTINF')) {
+          // Cerca l'ultima virgola per il nome
+          const parts = line.split(',');
+          if (parts.length > 1) {
+            currentName = parts[parts.length - 1].trim();
+          }
+        }
+        // Se è un URL
+        else if (!line.startsWith('#') && line.includes('://')) {
+          channels.push({
+            name: currentName,
+            url: line,
+            logo: null,
+            group: ''
+          });
+          currentName = 'Canale'; // Reset
+        }
+      }
+      
+      return channels;
+    }
+    
+    // Parser ultra-semplice
+    function parseM3USimple(content) {
+      const channels = [];
+      const lines = content.split('\n');
+      let channelIndex = 1;
+      
+      for (let line of lines) {
+        line = line.trim();
+        if (!line || line.startsWith('#')) continue;
+        
+        if (line.includes('://')) {
+          channels.push({
+            name: `Canale ${channelIndex}`,
+            url: line,
+            logo: null,
+            group: ''
+          });
+          channelIndex++;
+        }
+      }
+      
+      return channels;
+    }
+    
+    // ============================
+    // LISTA DI TEST
+    // ============================
+    function loadTestPlaylist() {
+      const testM3U = `#EXTM3U x-tvg-url="https://example.com/epg.xml"
+#EXTINF:-1 tvg-id="rai1.it" tvg-name="RAI 1" tvg-logo="https://logos.sky.it/rai1hd.png" group-title="ITALIA",RAI 1 HD
+https://rai1.akamaized.net/hls/live/598059/rai1/rai1.m3u8
+
+#EXTINF:-1 tvg-id="rai2.it" tvg-name="RAI 2" tvg-logo="https://logos.sky.it/rai2hd.png" group-title="ITALIA",RAI 2 HD
+https://rai2.akamaized.net/hls/live/598060/rai2/rai2.m3u8
+
+#EXTINF:-1 tvg-id="rai3.it" tvg-name="RAI 3" tvg-logo="https://logos.sky.it/rai3hd.png" group-title="ITALIA",RAI 3 HD
+https://rai3.akamaized.net/hls/live/598061/rai3/rai3.m3u8
+
+#EXTINF:-1 tvg-id="realtime.it" tvg-name="Realtime" tvg-logo="https://example.com/realtime.png" group-title="INTERTENIMENTO",Realtime
+http://example.com/stream1.m3u8
+
+#EXTINF:-1 tvg-id="dmax.it" tvg-name="DMAX" tvg-logo="https://example.com/dmax.png" group-title="INTERTENIMENTO",DMAX
+http://example.com/stream2.m3u8
+
+#EXTINF:-1,Canale Sport 1
+http://sports.example.com/stream.m3u8
+
+#EXTINF:-1,Canale Sport 2
+http://sports.example.com/stream2.m3u8
+
+#EXTINF:0,Canale Live
+https://livestream.example.com/channel.m3u8
+
+http://direct-stream.example.com/without-extinf.m3u8
+
+https://another-direct.example.com/stream.ts`;
+      
+      const channels = parseM3U(testM3U);
+      
+      const playlist = {
+        id: 'test_' + Date.now(),
+        name: '📺 LISTA DI TEST',
+        channels: channels,
+        date: new Date().toISOString()
+      };
+      
+      playlists.push(playlist);
+      saveToStorage();
+      renderPlaylists();
+      renderChannels(channels);
+      
+      showNotification(`✅ Lista di test caricata (${channels.length} canali)`, 'success');
+      elements.statusInfo.textContent = `Lista test: ${channels.length} canali`;
+      updateChannelCount();
+    }
+    
+    // ============================
+    // RENDER INTERFACCIA
+    // ============================
+    function renderChannels(channels) {
+      elements.channelsList.innerHTML = '';
+      
+      if (channels.length === 0) {
+        elements.channelsList.innerHTML = `
+          <div style="text-align:center; padding:40px; color:#8899cc;">
+            <div style="font-size:48px; margin-bottom:20px;">📺</div>
+            <div>Nessun canale in questa lista</div>
+            <div style="font-size:12px; margin-top:10px;">Carica una lista M3U o usa "Lista Test"</div>
+          </div>
+        `;
+        return;
+      }
+      
+      channels.forEach((channel, index) => {
+        const li = document.createElement('li');
+        li.className = 'channel-item';
+        li.innerHTML = `
+          <div class="channel-name">
+            ${channel.logo ? `<img src="${channel.logo}" alt="logo" style="width:20px;height:20px;border-radius:3px;margin-right:8px;vertical-align:middle;">` : '📺'}
+            ${channel.name}
+          </div>
+          <div class="channel-url" title="${channel.url}">
+            ${channel.url.substring(0, 60)}${channel.url.length > 60 ? '...' : ''}
+          </div>
+          ${channel.group ? `<div style="font-size:10px; color:#00d4ff; margin-top:3px;">${channel.group}</div>` : ''}
+        `;
+        
+        li.addEventListener('click', () => playChannel(channel));
+        
+        elements.channelsList.appendChild(li);
+      });
+    }
+    
+    function renderPlaylists() {
+      elements.savedPlaylists.innerHTML = '';
+      
+      if (playlists.length === 0) {
+        elements.savedPlaylists.innerHTML = `
+          <div style="text-align:center; padding:30px; color:#8899cc;">
+            <div style="font-size:36px; margin-bottom:10px;">💾</div>
+            <div>Nessuna lista salvata</div>
+          </div>
+        `;
+        return;
+      }
+      
+      playlists.forEach(playlist => {
+        const li = document.createElement('li');
+        li.className = 'playlist-item';
+        li.innerHTML = `
+          <div>
+            <div style="font-weight:bold;">${playlist.name}</div>
+            <div style="font-size:11px; color:#8899cc;">
+              ${playlist.channels.length} canali • 
+              ${new Date(playlist.date).toLocaleDateString('it-IT')}
+            </div>
+          </div>
+          <button class="delete-btn" style="background:#ff1b1b; border:none; color:white; padding:5px 10px; border-radius:3px; cursor:pointer;">X</button>
+        `;
+        
+        // Carica playlist
+        li.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('delete-btn')) {
+            renderChannels(playlist.channels);
+            showNotification(`📂 ${playlist.name} caricata`, 'success');
+          }
+        });
+        
+        // Elimina playlist
+        const deleteBtn = li.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Eliminare "${playlist.name}"?`)) {
+            playlists = playlists.filter(p => p.id !== playlist.id);
+            saveToStorage();
+            renderPlaylists();
+            updateChannelCount();
+            showNotification(`🗑️ "${playlist.name}" eliminata`, 'success');
+          }
+        });
+        
+        elements.savedPlaylists.appendChild(li);
+      });
+    }
+    
+    // ============================
+    // RIPRODUZIONE CANALI
+    // ============================
+    function playChannel(channel) {
+      console.log('▶️ Riproduzione:', channel.name);
+      
+      currentChannel = channel;
+      
+      // Aggiorna UI
+      elements.nowPlayingTitle.textContent = channel.name;
+      elements.nowPlayingInfo.textContent = channel.url.substring(0, 80) + (channel.url.length > 80 ? '...' : '');
+      
+      // Imposta e riproduce video
+      elements.mainVideo.src = channel.url;
+      elements.mainVideo.load();
+      
+      elements.mainVideo.play()
+        .then(() => {
+          console.log('✅ Video in riproduzione');
+          showNotification(`▶️ ${channel.name}`, 'success');
+          elements.statusInfo.textContent = `In riproduzione: ${channel.name}`;
+        })
+        .catch(error => {
+          console.warn('⚠️ Auto-play fallito, l\'utente deve cliccare play:', error);
+          showNotification('Clicca play per avviare il video', 'warning');
+          elements.statusInfo.textContent = 'Pronto - Clicca play';
+        });
+    }
+    
+    function resetPlayer() {
+      elements.mainVideo.src = '';
+      elements.nowPlayingTitle.textContent = 'Nessun canale selezionato';
+      elements.nowPlayingInfo.textContent = '';
+      currentChannel = null;
+    }
+    
+    // ============================
+    // REGISTRAZIONE
+    // ============================
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingTimer = null;
+    let recordingStart = null;
+    
+    async function toggleRecording() {
+      if (!currentChannel) {
+        showNotification('❌ Seleziona prima un canale!', 'error');
+        return;
+      }
+      
+      if (!isRecording) {
+        // INIZIA REGISTRAZIONE
+        try {
+          const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: {
+              displaySurface: 'browser',
+              frameRate: { ideal: 25, max: 30 }
+            },
+            audio: true
+          });
+          
+          mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm;codecs=vp9',
+            videoBitsPerSecond: 2500000
+          });
+          
+          recordedChunks = [];
+          
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
+          
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            saveRecording(blob);
+            stream.getTracks().forEach(track => track.stop());
+          };
+          
+          mediaRecorder.start(1000); // Chunk ogni secondo
+          isRecording = true;
+          recordingStart = Date.now();
+          
+          // Aggiorna UI
+          elements.recordBtn.classList.add('recording');
+          elements.recordBtn.textContent = '⏹️ STOP';
+          elements.statusInfo.textContent = '⏺️ Registrazione in corso...';
+          showNotification('⏺️ Registrazione avviata!', 'success');
+          
+          // Timer
+          recordingTimer = setInterval(() => {
+            const seconds = Math.floor((Date.now() - recordingStart) / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            elements.statusInfo.textContent = `⏺️ Registrazione: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          }, 1000);
+          
+        } catch (error) {
+          console.error('❌ Errore avvio registrazione:', error);
+          showNotification('❌ Errore avvio registrazione', 'error');
+        }
+        
+      } else {
+        // FERMA REGISTRAZIONE
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        
+        if (recordingTimer) {
+          clearInterval(recordingTimer);
+          recordingTimer = null;
+        }
+        
+        isRecording = false;
+        elements.recordBtn.classList.remove('recording');
+        elements.recordBtn.textContent = '⏺️ REC';
+        elements.statusInfo.textContent = 'Registrazione salvata!';
+      }
+    }
+    
+    function saveRecording(blob) {
+      const timestamp = new Date().toLocaleString('it-IT')
+        .replace(/[/:\\]/g, '-')
+        .replace(/,/g, '')
+        .replace(/\s+/g, '_');
+      
+      const channelName = currentChannel ? 
+        currentChannel.name.replace(/[^\w\s-]/gi, '').substring(0, 30) : 
+        'registrazione';
+      
+      const filename = `SANDRO_REC_${channelName}_${timestamp}.webm`;
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      
+      document.body.appendChild(a);
+      a.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      showNotification(`💾 Registrazione salvata: ${filename}`, 'success');
+    }
+    
+    // ============================
+    // UTILITIES
+    // ============================
+    function showNotification(message, type = 'info') {
+      // Rimuovi notifiche precedenti
+      const oldNotifications = document.querySelectorAll('.notification');
+      oldNotifications.forEach(n => n.remove());
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Auto-rimuovi dopo 5 secondi
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.transition = 'transform 0.3s ease, opacity 0.3s';
+          notification.style.transform = 'translateX(100%)';
+          notification.style.opacity = '0';
+          
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.remove();
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
+    
+    function updateChannelCount() {
+      const total = playlists.reduce((sum, pl) => sum + pl.channels.length, 0);
+      elements.channelCount.textContent = `${total} canali totali`;
+    }
+    
+    function loadFromStorage() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          playlists = JSON.parse(saved);
+          console.log(`📂 Caricate ${playlists.length} liste da localStorage`);
+          renderPlaylists();
+          updateChannelCount();
+        }
+      } catch (e) {
+        console.error('❌ Errore caricamento storage:', e);
+        playlists = [];
+      }
+    }
+    
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(playlists));
+        console.log('💾 Dati salvati in localStorage');
+      } catch (e) {
+        console.error('❌ Errore salvataggio storage:', e);
+      }
+    }
+    
+    // ============================
+    // DEBUG: MOSTRA FORMATI M3U
+    // ============================
+    console.log(`
+    ============================================
+    FORMATI M3U SUPPORTATI:
+    
+    1. FORMATO STANDARD:
+       #EXTINF:-1,RAI 1
+       http://example.com/stream.m3u8
+    
+    2. FORMATO CON ATTRIBUTI:
+       #EXTINF:-1 tvg-id="rai1.it" tvg-logo="logo.png" group-title="ITALIA",RAI 1
+       http://example.com/stream.m3u8
+    
+    3. FORMATO SEMPLICE (solo URL):
+       http://example.com/stream.m3u8
+    
+    4. QUALSIASI FORMATO CON URL VALIDO!
+    ============================================
+    `);
+  </script>
+</body>
+</html>
