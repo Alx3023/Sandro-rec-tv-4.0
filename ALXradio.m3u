@@ -1,0 +1,31 @@
+#EXTM3U
+
+#EXTINF:-1 tvg-id="RadioFano" tvg-name="Radio Fano" tvg-logo="https://i.imgur.com/8tYFano.png" group-title="Radio Italia Locali", Radio Fano
+http://stream15.xdevel.com:80/radiofano/stream.mp3
+
+#EXTINF:-1 tvg-id="RadioLinea" tvg-name="Radio Linea" tvg-logo="https://i.imgur.com/LineaHD.png" group-title="Radio Italia Locali", Radio Linea
+https://stream12.xdevel.com/radiolinea/stream/playlist.m3u8
+
+#EXTINF:-1 tvg-id="Arancia" tvg-name="Radio Arancia" tvg-logo="https://i.imgur.com/AranciaHD.png" group-title="Radio Italia Locali", Radio Arancia
+https://stream12.xdevel.com/radioarancia/stream/playlist.m3u8
+
+#EXTINF:-1 tvg-id="Piterpan" tvg-name="Radio Piterpan" tvg-logo="https://i.imgur.com/PiterpanHD.png" group-title="Radio Italia Locali", Radio Piterpan
+https://stream.radiopiterpan.it/piterpan.mp3
+
+#EXTINF:-1 tvg-id="BelllaMonella" tvg-name="Radio Bellla & Monella" tvg-logo="https://i.imgur.com/BelllaMonellaHD.png" group-title="Radio Italia Locali", Bellla & Monella
+https://stream.belllaemonella.it/bem.mp3
+
+#EXTINF:-1 tvg-id="RadioKolbe" tvg-name="Radio Kolbe" tvg-logo="https://i.imgur.com/KolbeHD.png" group-title="Radio Italia Locali", Radio Kolbe
+https://stream12.xdevel.com/radiokolbe/stream/playlist.m3u8
+
+#EXTINF:-1 tvg-id="RadioVenezia" tvg-name="Radio Venezia" tvg-logo="https://i.imgur.com/VeneziaHD.png" group-title="Radio Italia Locali", Radio Venezia
+https://stream.radiovenezia.it/live.mp3
+
+#EXTINF:-1 tvg-id="RadioPadova" tvg-name="Radio Padova" tvg-logo="https://i.imgur.com/PadovaHD.png" group-title="Radio Italia Locali", Radio Padova
+https://stream.radiopadova.com/padova.mp3
+
+#EXTINF:-1 tvg-id="RadioStudio7" tvg-name="Radio Studio 7" tvg-logo="https://i.imgur.com/Studio7HD.png" group-title="Radio Italia Locali", Radio Studio 7
+https://stream15.xdevel.com/studio7/stream.mp3
+
+#EXTINF:-1 tvg-id="RadioCiao" tvg-name="Radio Ciao" tvg-logo="https://i.imgur.com/CiaoHD.png" group-title="Radio Italia Locali", Radio Ciao
+https://stream15.xdevel.com/radiociao/stream.mp3
